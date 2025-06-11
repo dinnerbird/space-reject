@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "control.h"
-
+#include "stdio.h"
 #include "midi.h"
 #include "pb.h"
 #include "TBall.h"
@@ -30,6 +30,11 @@
 #include "TWall.h"
 #include "TTextBox.h"
 #include "translations.h"
+#include <thread>
+#include <cassert>
+#include <chrono>
+#include "render.h"
+#include "timer.h"
 
 int control_bump_scores1[] = {500, 1000, 1500, 2000};
 int control_roll_scores1[] = {2000};
@@ -843,6 +848,26 @@ std::reference_wrapper<TLight*> control::WormholeLightArray2[3] =
 };
 
 
+void cartoony_crash_shake(int shakes, void*) {
+
+	assert(shakes >= 0 && shakes < 100); // Debug: check shakes value
+
+    render::shift(0, -50);
+
+    if (shakes > 1) {
+        timer::set(0.1f, reinterpret_cast<void*>(shakes - 1), [](int shakes, void*) {
+			            assert(shakes >= 0 && shakes < 100); // Debug: check shakes value in lambda
+
+            render::shift(0, 50);
+            if (shakes > 0)
+                timer::set(0.1f, reinterpret_cast<void*>(shakes), cartoony_crash_shake);
+            else
+                timer::set(0.1f, nullptr, [](int, void*) { render::shift(0, 0); });
+        });
+    } else {
+        timer::set(0.1f, nullptr, [](int, void*) { render::shift(0, 0); });
+    }
+}
 void control::make_links(TPinballTable* table)
 {
 	TableG = table;
@@ -2819,7 +2844,11 @@ void control::BallDrainControl(MessageCode code, TPinballComponent* caller)
 						lite199->MessageField = 1;
 					}
 					soundwave27->Play(nullptr, "BallDrainControl8");
+
+
+					// THIS IS WHERE THE CARTOONY SHAKE WILL GO
 				}
+
 				bmpr_inc_lights->Message(MessageCode::TLightResetAndTurnOff, 0.0);
 				ramp_bmpr_inc_lights->Message(MessageCode::TLightResetAndTurnOff, 0.0);
 				lite30->Message(MessageCode::TLightResetAndTurnOff, 0.0);
@@ -4580,6 +4609,7 @@ void control::UnselectMissionController(MessageCode code, TPinballComponent* cal
 
 void control::WaitingDeploymentController(MessageCode code, TPinballComponent* caller)
 {
+
 	switch (code)
 	{
 	case MessageCode::ControlCollision:
@@ -4596,6 +4626,7 @@ void control::WaitingDeploymentController(MessageCode code, TPinballComponent* c
 		break;
 	case MessageCode::ControlMissionStarted:
 		mission_text_box->Display(pb::get_rc_string(Msg::STRING151), -1.0);
+
 		break;
 	default:
 		break;
