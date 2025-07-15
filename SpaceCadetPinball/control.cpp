@@ -30,11 +30,6 @@
 #include "TWall.h"
 #include "TTextBox.h"
 #include "translations.h"
-#include <thread>
-#include <cassert>
-#include <chrono>
-#include "render.h"
-#include "timer.h"
 
 int control_bump_scores1[] = {500, 1000, 1500, 2000};
 int control_roll_scores1[] = {2000};
@@ -847,7 +842,7 @@ std::reference_wrapper<TLight*> control::WormholeLightArray2[3] =
 	lite4, lite2, lite3
 };
 
-
+/*
 void cartoony_crash_shake(int shakes, void*) {
 
 	assert(shakes >= 0 && shakes < 100); // Debug: check shakes value
@@ -867,7 +862,7 @@ void cartoony_crash_shake(int shakes, void*) {
     } else {
         timer::set(0.1f, nullptr, [](int, void*) { render::shift(0, 0); });
     }
-}
+} */
 void control::make_links(TPinballTable* table)
 {
 	TableG = table;
